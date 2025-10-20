@@ -1,0 +1,18 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  postgres_db:
+    image: postgres:15-alpine
+    container_name: db_accidents
+    environment:
+      POSTGRES_USER: user_securite_routiere
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: securite_routiere_db
+    ports:
+      - "5432:5432" # Mappe le port du conteneur au port de votre machine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persistance des données
+
+volumes:
+  postgres_data:

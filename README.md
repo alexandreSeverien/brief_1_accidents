@@ -11,33 +11,14 @@ L’objectif final est de produire des visualisations claires et des modèles pr
 
 ---
 
-## 🗂️ Structure du projet
+## 📁 Structure du projet
+
+```text
 BRIEF_1_ACCIDENTS/
-│
-├── analyse/
-│   └── Notebooks et scripts d’analyse exploratoire (EDA avancée, visualisations, indicateurs statistiques)
-│
-├── EDA/
-│   └── data/
-│       └── Datasets bruts et nettoyés.
-│          ⚠️ Les fichiers lourds (>100 MB) ne sont pas versionnés (voir .gitignore).
-│
-├── ingestion/
-│   └── Scripts d’importation et de préparation des données :
-│       - lecture des fichiers CSV
-│       - nettoyage, typage, suppression des doublons
-│       - sauvegarde au format exploitable
-│
-├── modelisation/
-│   └── Notebooks et scripts pour la modélisation :
-│       - régression, classification, ou clustering
-│       - sélection et évaluation des modèles
-│       - visualisation des performances
-│
-├── stockage/
-│   └── Scripts ou requêtes liés au stockage :
-│       - export vers bases SQL ou fichiers parquet
-│       - automatisation des flux de données
-│
-└── .gitignore
-└── Liste des fichiers et dossiers ignorés (datasets volumineux, outputs temporaires, notebooks checkpoints, etc.)
+├─ analyse/            # Notebooks & scripts d’analyse exploratoire (EDA, viz)
+├─ EDA/
+│  └─ data/            # Jeux de données locaux (⚠️ non versionnés)
+├─ ingestion/          # Import, nettoyage, typage des données
+├─ modelisation/       # Entraînement, évaluation des modèles
+├─ stockage/           # SQL/Parquet, IO & persistance
+└─ .gitignore          # Ignore datasets/outputs lourds

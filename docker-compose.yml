@@ -2,17 +2,28 @@
 version: '3.8'
 
 services:
+  # Le nom de notre service
   postgres_db:
-    image: postgres:15-alpine
-    container_name: db_accidents
+    # On utilise l'image officielle de PostGIS, basée sur Postgres 15
+    image: postgis/postgis:15-3.4
+    container_name: db_accidents_postgis
+    
+    # Variables d'environnement pour configurer la base de données à sa création
     environment:
       POSTGRES_USER: user_securite_routiere
       POSTGRES_PASSWORD: password123
       POSTGRES_DB: securite_routiere_db
+      
+    # Mappe le port 5432 du conteneur au port 5432 de notre machine locale
+    # C'est ce qui nous permettra de nous connecter avec DBeaver ou Python
     ports:
-      - "5432:5432" # Mappe le port du conteneur au port de votre machine
+      - "5432:5432"
+      
+    # Volume pour la persistance des données
+    # Assure que nos données ne sont pas perdues si le conteneur est redémarré
     volumes:
-      - postgres_data:/var/lib/postgresql/data # Persistance des données
+      - postgres_data:/var/lib/postgresql/data
 
+# Déclaration du volume nommé pour la persistance
 volumes:
   postgres_data:

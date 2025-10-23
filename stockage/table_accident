@@ -1,10 +1,11 @@
-CREATE TABLE IF NOT EXISTS region (
+
+CREATE TABLE IF NOT EXISTS silver.region (
    reg_code VARCHAR(3) PRIMARY KEY,
    reg_name VARCHAR(100) NOT NULL,
    gps VARCHAR(50)
 );
 
-CREATE TABLE IF NOT EXISTS departement (
+CREATE TABLE IF NOT EXISTS silver.departement (
  dep_code VARCHAR(3) PRIMARY KEY,
    dep_name VARCHAR(100) NOT NULL,
    reg_code VARCHAR(3) NOT NULL,
@@ -17,7 +18,7 @@ CREATE TABLE IF NOT EXISTS departement (
        ON DELETE RESTRICT
 );
 
-CREATE TABLE IF NOT EXISTS epci (
+CREATE TABLE IF NOT EXISTS silver.epci (
    epci_code VARCHAR(10) PRIMARY KEY,
    epci_name VARCHAR(150) NOT NULL,
    dep_code VARCHAR(3) NOT NULL,
@@ -28,7 +29,7 @@ CREATE TABLE IF NOT EXISTS epci (
        ON DELETE RESTRICT
 );
 
-CREATE TABLE IF NOT EXISTS commune (
+CREATE TABLE IF NOT EXISTS silver.commune (
    com_code VARCHAR(10) PRIMARY KEY,
    com_name VARCHAR(150) NOT NULL,
    com_arm_name VARCHAR(150),
@@ -53,7 +54,7 @@ CREATE TABLE IF NOT EXISTS commune (
        ON DELETE RESTRICT
 );
 
-CREATE TABLE IF NOT EXISTS accident (
+CREATE TABLE IF NOT EXISTS silver.accident (
    num_acc VARCHAR(20) PRIMARY KEY,
    com_code VARCHAR(10) NOT NULL,
    adr VARCHAR(500),
@@ -66,7 +67,7 @@ CREATE TABLE IF NOT EXISTS accident (
        ON DELETE RESTRICT
 );
 
-CREATE TABLE IF NOT EXISTS circonstances_accident (
+CREATE TABLE IF NOT EXISTS silver.circonstances_accident (
 num_acc VARCHAR(20) PRIMARY KEY,
    lum VARCHAR(15),
    agg VARCHAR(4),
@@ -84,7 +85,7 @@ num_acc VARCHAR(20) PRIMARY KEY,
    larrout VARCHAR(50),
    lartpc VARCHAR(50),
    nbv VARCHAR(10),
-   catrl VARCHAR(50),
+   catr VARCHAR(50),
    pr1 VARCHAR(50),
    plan VARCHAR(50),
    prof VARCHAR(50),
@@ -103,7 +104,7 @@ num_acc VARCHAR(20) PRIMARY KEY,
 
 );
 
-CREATE TABLE IF NOT EXISTS vehicule (
+CREATE TABLE IF NOT EXISTS silver.vehicule (
    num_acc VARCHAR(20) NOT NULL,
    num_veh VARCHAR(15) NOT NULL,
    place VARCHAR(15),
@@ -119,7 +120,7 @@ CREATE TABLE IF NOT EXISTS vehicule (
        ON DELETE RESTRICT
 );
 
-CREATE TABLE IF NOT EXISTS personne (
+CREATE TABLE IF NOT EXISTS silver.personne (
    id_personne BIGSERIAL PRIMARY KEY,
    num_acc VARCHAR(20),
    num_veh VARCHAR(15),

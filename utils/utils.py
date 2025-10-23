@@ -64,34 +64,28 @@ def insert_data_to_db(df, table_name, engine):
         conn.execute(query, records)
 
 
-def connect_to_db(user, password, host, port, db_name):
-    """Crée un moteur SQLAlchemy pour se connecter à une base PostgreSQL.
+from dotenv import load_dotenv
+import os
+from sqlalchemy import create_engine
+import sys
+sys.path.append("..")
+  # charge le .env à la racine du projet
 
-    Parameters
-    ----------
-    user : str
-        Nom d'utilisateur PostgreSQL.
-    password : str
-        Mot de passe associé.
-    host : str
-        Hôte ou adresse IP du serveur PostgreSQL.
-    port : str | int
-        Port d'écoute PostgreSQL.
-    db_name : str
-        Nom de la base de données.
+def connect_to_db():
+    load_dotenv()
+    user = os.getenv("DB_USER")
+    password = os.getenv("DB_PASSWORD")
+    host = os.getenv("DB_HOST")
+    port = os.getenv("DB_PORT")
+    db_name = os.getenv("DB_NAME")
 
-    Returns
-    -------
-    sqlalchemy.engine.Engine | None
-        Moteur SQLAlchemy si la connexion est un succès, sinon ``None``.
-    """
-    DATABASE_URL = f'postgresql+psycopg2://{user}:{password}@{host}:{port}/{db_name}'
+    DATABASE_URL = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{db_name}"
     try:
         engine = create_engine(DATABASE_URL)
-        print("Connexion à la base de données PostgreSQL réussie !")
+        print("✅ Connexion à la base PostgreSQL réussie !")
         return engine
     except Exception as e:
-        print(f"Erreur de connexion à la base de données : {e}")
+        print(f"❌ Erreur de connexion : {e}")
         return None
 
 

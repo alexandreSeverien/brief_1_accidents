@@ -72,6 +72,23 @@ sys.path.append("..")
   # charge le .env à la racine du projet
 
 def connect_to_db():
+    """Établit une connexion à une base de données PostgreSQL à partir du fichier .env.
+
+    Cette fonction charge les variables d'environnement définies dans un fichier `.env`
+    (DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME), construit l'URL de connexion,
+    puis crée un moteur SQLAlchemy permettant d’interagir avec la base PostgreSQL.
+
+    Returns:
+        sqlalchemy.engine.Engine | None: 
+            Moteur SQLAlchemy si la connexion est établie avec succès, 
+            sinon None en cas d’erreur (un message d’erreur est affiché).
+
+    Example:
+        >>> engine = connect_to_db()
+        ✅ Connexion à la base PostgreSQL réussie !
+        >>> engine.execute("SELECT 1")
+        <sqlalchemy.engine.cursor.CursorResult object ...>
+    """
     load_dotenv()
     user = os.getenv("DB_USER")
     password = os.getenv("DB_PASSWORD")
@@ -89,29 +106,39 @@ def connect_to_db():
         return None
 
 
-def fetch_data_from_db(table_name, engine):
-    """Récupère toutes les lignes d'une table PostgreSQL dans un DataFrame.
+def fetch_data_from_db(table_name, engine, schema=None):
+    """Récupère une table PostgreSQL dans un DataFrame Pandas.
 
-    Parameters
-    ----------
-    table_name : str
-        Nom de la table cible dans la base de données.
-    engine : sqlalchemy.engine.Engine
-        Moteur SQLAlchemy connecté à la base PostgreSQL.
+    Cette fonction construit automatiquement le nom pleinement qualifié de la
+    table (schema.table) si `schema` est fourni, cite les identifiants pour
+    éviter les problèmes de casse/espaces, exécute un `SELECT *` et renvoie le
+    résultat sous forme de DataFrame.
 
-    Returns
-    -------
-    pandas.DataFrame | None
-        DataFrame contenant les données si la récupération est un succès, sinon ``None``.
+    Args:
+        table_name (str): Nom de la table à lire (ex. "accidents_raw").
+        engine (sqlalchemy.engine.Engine): Moteur SQLAlchemy connecté à la base.
+        schema (str | None): Schéma de la table (ex. "bronze"). Si None, le
+            `search_path` courant est utilisé.
+
+    Returns:
+        pandas.DataFrame | None: Le contenu de la table si la requête réussit,
+        sinon None (un message d'erreur est affiché).
+
+    Example:
+        >>> engine = connect_to_db()
+        >>> df = fetch_data_from_db("accidents_raw", engine, schema="bronze")
+        >>> df.shape
+        (475911, 69)
     """
     try:
+        full = f'"{schema}"."{table_name}"' if schema else f'"{table_name}"'
+        q = text(f"SELECT * FROM {full}")
         with engine.connect() as conn:
-            query = text(f"SELECT * FROM {table_name}")
-            df = pd.read_sql_query(query, conn)
-            print(f"Données récupérées avec succès depuis la table '{table_name}'.")
-            return df
+            df = pd.read_sql_query(q, conn)
+        print(f"OK: {full}")
+        return df
     except Exception as e:
-        print(f"Erreur lors de la récupération des données : {e}")
+        print(f"Erreur SELECT: {e}")
         return None
 
 # =====================================================================

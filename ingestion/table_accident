@@ -16,16 +16,13 @@ CREATE TABLE IF NOT EXISTS silver.region (
 );
 
 CREATE TABLE IF NOT EXISTS silver.departement (
-dep_code VARCHAR(3) PRIMARY KEY,
-   dep_name VARCHAR(100) NOT NULL,
-   reg_code VARCHAR(3) NOT NULL,
-   insee VARCHAR(10),
-   dep VARCHAR(10),
-   CONSTRAINT fk_departement_region
-       FOREIGN KEY (reg_code)
-       REFERENCES region(reg_code)
-       ON UPDATE CASCADE
-       ON DELETE RESTRICT
+    dep_code VARCHAR(3) PRIMARY KEY,
+    dep_name VARCHAR(100) NOT NULL,
+    reg_code VARCHAR(3) NOT NULL,
+    insee VARCHAR(10),
+    dep VARCHAR(10),
+    CONSTRAINT fk_reg_code FOREIGN KEY (reg_code) REFERENCES silver.region(reg_code)
+    ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS silver.epci (
@@ -44,7 +41,6 @@ CREATE TABLE IF NOT EXISTS silver.commune (
    com_name VARCHAR(150),
    com_arm_name VARCHAR(150),
    epci_code VARCHAR(10),
-   dep_code VARCHAR(3),
    nom_com VARCHAR(150),
    adr VARCHAR(500),
    lat FLOAT,
@@ -57,23 +53,19 @@ CREATE TABLE IF NOT EXISTS silver.commune (
        FOREIGN KEY (epci_code)
        REFERENCES epci(epci_code)
        ON UPDATE CASCADE,
-   CONSTRAINT fk_commune_dept
-       FOREIGN KEY (dep_code)
-       REFERENCES departement(dep_code)
-       ON UPDATE CASCADE
        ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS silver.accident (
    num_acc VARCHAR(20) PRIMARY KEY,
-   id_veh VARCHAR(20),
-   com_code VARCHAR(10) NOT NULL,
+   num_veh VARCHAR(20),
+   com VARCHAR(10) NOT NULL,
    adr VARCHAR(500),
    datetime TIMESTAMP NOT NULL,
    year_georef VARCHAR(5),
    CONSTRAINT fk_accident_commune
-       FOREIGN KEY (com_code)
-       REFERENCES commune(com_code)
+       FOREIGN KEY (com)
+       REFERENCES commune(com)
        ON UPDATE CASCADE
        ON DELETE RESTRICT
 );
@@ -129,24 +121,24 @@ CREATE TABLE IF NOT EXISTS silver.vehicule (
        REFERENCES accident(num_acc)
        ON UPDATE CASCADE
        ON DELETE RESTRICT
-);
 
-CREATE TABLE IF NOT EXISTS silver.personne (
-   id_personne BIGSERIAL PRIMARY KEY,
-   num_acc VARCHAR(20),
-   num_veh VARCHAR(15),
-   an_nais VARCHAR(4),
-   sexe VARCHAR(1),
-   actp VARCHAR(50),
-   grav VARCHAR(50),
-   locp VARCHAR(50),
-   catu VARCHAR(50),
-   etatp VARCHAR(50),
-   occutc VARCHAR(10),
-   CONSTRAINT fk_personne_vehicule
+
+CREATE TABLE IF NOT EXISTS silver.personnes (
+    num_acc VARCHAR(50),
+    num_veh VARCHAR(50),
+    an_nais INT,
+    sexe VARCHAR(20),
+    actp VARCHAR(100),
+    locp VARCHAR(50),
+    occutc VARCHAR(100),
+    catu VARCHAR(50),
+    etatp VARCHAR(50),
+    grav VARCHAR(100),
+    PRIMARY KEY (num_acc, num_veh),
+    CONSTRAINT fk_personne_vehicule
        FOREIGN KEY (num_acc, num_veh)
        REFERENCES vehicule(num_acc, num_veh)
        ON UPDATE CASCADE
        ON DELETE RESTRICT
-
 );
+

@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS silver.epci (
    dep_code VARCHAR(3) NOT NULL,
    CONSTRAINT fk_epci_departement
        FOREIGN KEY (dep_code)
-       REFERENCES departement(dep_code)
+       REFERENCES silver.departement(dep_code)
        ON UPDATE CASCADE
        ON DELETE RESTRICT
 );
@@ -51,8 +51,8 @@ CREATE TABLE IF NOT EXISTS silver.commune (
    num VARCHAR(20),
    CONSTRAINT fk_commune_epci
        FOREIGN KEY (epci_code)
-       REFERENCES epci(epci_code)
-       ON UPDATE CASCADE,
+       REFERENCES silver.epci(epci_code)
+       ON UPDATE CASCADE
        ON DELETE RESTRICT
 );
 
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS silver.accident (
    year_georef VARCHAR(5),
    CONSTRAINT fk_accident_commune
        FOREIGN KEY (com)
-       REFERENCES commune(com)
+       REFERENCES silver.commune(com)
        ON UPDATE CASCADE
        ON DELETE RESTRICT
 );
@@ -102,9 +102,9 @@ CREATE TABLE IF NOT EXISTS circonstances_accident (
    obs VARCHAR(255),         -- "Support de signalisation verticale ..."
    CONSTRAINT fk_circonstances_accident_accident
        FOREIGN KEY (num_acc)
-       REFERENCES accident(num_acc)
+       REFERENCES silver.accident(num_acc)
        ON UPDATE CASCADE
-       ON DELETE RESTRICT
+       ON DELETE RESTRICT);
 
 CREATE TABLE IF NOT EXISTS silver.vehicule (
    num_acc VARCHAR(20) NOT NULL,
@@ -117,9 +117,9 @@ CREATE TABLE IF NOT EXISTS silver.vehicule (
    CONSTRAINT pk_vehicule PRIMARY KEY (num_acc, num_veh),
    CONSTRAINT fk_vehicule_accident
        FOREIGN KEY (num_acc)
-       REFERENCES accident(num_acc)
+       REFERENCES silver.accident(num_acc)
        ON UPDATE CASCADE
-       ON DELETE RESTRICT
+       ON DELETE RESTRICT);
 
 
 CREATE TABLE IF NOT EXISTS silver.personnes (
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS silver.personnes (
     PRIMARY KEY (num_acc, num_veh),
     CONSTRAINT fk_personne_vehicule
        FOREIGN KEY (num_acc, num_veh)
-       REFERENCES vehicule(num_acc, num_veh)
+       REFERENCES silver.vehicule(num_acc, num_veh)
        ON UPDATE CASCADE
        ON DELETE RESTRICT
 );

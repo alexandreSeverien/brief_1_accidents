@@ -1,4 +1,3 @@
-
 DROP TABLE IF EXISTS silver.personne CASCADE;
 DROP TABLE IF EXISTS silver.vehicule CASCADE;
 DROP TABLE IF EXISTS silver.circonstances_accident CASCADE;
@@ -70,41 +69,42 @@ CREATE TABLE IF NOT EXISTS silver.accident (
        ON DELETE RESTRICT
 );
 
-CREATE TABLE IF NOT EXISTS circonstances_accident (
-   id_circonstance INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-   num_acc VARCHAR(20) UNIQUE,
-   lum VARCHAR(50),          -- ex: "Nuit sans éclairage public"
-   agg VARCHAR(30),          -- ex: "En agglomération"
-   int VARCHAR(10),          -- certains codes textuels possibles
-   atm VARCHAR(50),          -- "Temps éblouissant", "Pluie légère"
-   col VARCHAR(80),          -- "Deux véhicules – par le coté"
+CREATE TABLE IF NOT EXISTS silver.circonstances_accident (
+num_acc VARCHAR(20) PRIMARY KEY,
+   lum VARCHAR(15),
+   agg VARCHAR(4),
+   int VARCHAR(1),
+   atm VARCHAR(50),
+   col VARCHAR(50),
    pr VARCHAR(50),
    surf VARCHAR(50),
    v1 VARCHAR(50),
-   v2 VARCHAR(50),
-   circ VARCHAR(30),         -- "Bidirectionnelle", "A chaussées séparées"
+   v2 VARCHAR(10),
+   circ VARCHAR(1),
    vosp VARCHAR(50),
    env1 VARCHAR(50),
    voie VARCHAR(50),
    larrout VARCHAR(50),
    lartpc VARCHAR(50),
    nbv VARCHAR(10),
-   catr VARCHAR(50),         -- "Voie Communale", "Route Départementale"
+   catr VARCHAR(50),
    pr1 VARCHAR(50),
-   plan VARCHAR(50),         -- "Partie rectiligne", "En courbe à gauche"
-   prof VARCHAR(30),         -- "Plat", "Pente", "Sommet de côte"
-   infra VARCHAR(80),        -- "Bretelle d’échangeur ou de raccordement"
-   situ VARCHAR(30),         -- "Sur chaussée", "Sur trottoir"
-   secu_utl VARCHAR(255),    -- "Oui,Non déterminable,Oui"
-   trajet VARCHAR(255),      -- "Promenade – loisirs,Autre"
-   senc VARCHAR(255),        -- "PK ou PR ou numéro d’adresse postale ..."
-   obsm VARCHAR(255),        -- "Véhicule,Véhicule" etc.
-   obs VARCHAR(255),         -- "Support de signalisation verticale ..."
+   plan VARCHAR(50),
+   prof VARCHAR(50),
+   infra VARCHAR(10),
+   situ VARCHAR(1),
+   secu_utl VARCHAR(50),
+   trajet VARCHAR(50),
+   senc VARCHAR(50),
+   obsm VARCHAR(50),
+   obs VARCHAR(50),
    CONSTRAINT fk_circonstances_accident_accident
        FOREIGN KEY (num_acc)
        REFERENCES silver.accident(num_acc)
        ON UPDATE CASCADE
-       ON DELETE RESTRICT);
+       ON DELETE RESTRICT
+
+);
 
 CREATE TABLE IF NOT EXISTS silver.vehicule (
    num_acc VARCHAR(20) NOT NULL,
@@ -119,7 +119,8 @@ CREATE TABLE IF NOT EXISTS silver.vehicule (
        FOREIGN KEY (num_acc)
        REFERENCES silver.accident(num_acc)
        ON UPDATE CASCADE
-       ON DELETE RESTRICT);
+       ON DELETE RESTRICT
+);
 
 
 CREATE TABLE IF NOT EXISTS silver.personnes (
@@ -133,11 +134,10 @@ CREATE TABLE IF NOT EXISTS silver.personnes (
     catu VARCHAR(50),
     etatp VARCHAR(50),
     grav VARCHAR(100),
-    PRIMARY KEY (num_acc, num_veh, sexe),
+    PRIMARY KEY (num_acc, num_veh, sexe), -- Clé primaire améliorée pour plus d'unicité
     CONSTRAINT fk_personne_vehicule
        FOREIGN KEY (num_acc, num_veh)
        REFERENCES silver.vehicule(num_acc, num_veh)
        ON UPDATE CASCADE
        ON DELETE RESTRICT
 );
-

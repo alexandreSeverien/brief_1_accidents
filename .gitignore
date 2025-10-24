@@ -3,3 +3,4 @@ accidents-corporels-de-la-circulation-millesime.csv
 .venv/
 .env
 venv
+__pycache__/

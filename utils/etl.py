@@ -19,60 +19,81 @@ def transform_circonstances (df):
 
 def creer_df_vehicule(df_source: pd.DataFrame) -> pd.DataFrame:
     """
-    Crée le DataFrame des véhicules à partir du DataFrame source (df_silver).
-    Nettoie les colonnes, crée une clé primaire 'id_veh', et dédoublonne.
+    Crée le DataFrame 'vehicule' à partir d'un DataFrame source de la couche bronze
+    (colonnes FR) ou déjà renommé (silver). Renomme via `mapping_colonnes`, nettoie,
+    déduplique sur (num_acc, num_veh) et renvoie les colonnes prêtes pour l'insert.
     """
+
     print("=====================================================")
     print("        Fonction : Création de df_vehicule           ")
     print("=====================================================")
-    
-    # --- ÉTAPE 1 : Nettoyage Profond ---
-    colonnes_a_nettoyer = ['num_veh', 'place', 'choc', 'manv', 'catv', 'secu']
+
+    # 1) Renommage vers silver (silencieux si colonnes déjà bonnes)
+    df_work = df_source.rename(columns=mapping_colonnes)
+
+    # Colonnes attendues côté silver
+    required = ['num_acc', 'num_veh', 'place', 'choc', 'manv', 'catv', 'secu']
+    missing = [c for c in required if c not in df_work.columns]
+    if missing:
+        raise KeyError(f"Colonnes manquantes après renommage: {missing}")
+
+    # 2) Nettoyage profond (garde la 1re valeur si 'a,b,c', trim, remplace 'nan'/'')
     print("\nNettoyage profond des colonnes...")
-    for colonne in colonnes_a_nettoyer:
-        df_source[colonne] = df_source[colonne].astype(str).str.split(',').str[0].str.strip()
+    for col in ['num_veh', 'place', 'choc', 'manv', 'catv', 'secu']:
+        df_work[col] = (
+            df_work[col]
+            .astype(str)
+            .str.split(',').str[0]
+            .str.strip()
+            .replace({'nan': None, '': None})
+        )
     print("-> Colonnes nettoyées.")
 
-    # --- ÉTAPE 2 : Sélection et Création du DataFrame ---
-    col_vehicule = ['num_acc', 'num_veh', 'place', 'choc', 'manv', 'catv', 'secu']
-    df_vehicule = df_source[col_vehicule].copy()
-    
-    # --- ÉTAPE 3 : Application des Contraintes d'Unicité ---
-    df_vehicule.dropna(subset=['num_acc', 'num_veh'], inplace=True)
-    #df_vehicule.drop_duplicates(subset=['id_veh'], inplace=True)
-    
-    # --- ÉTAPE 4 : Finalisation du DataFrame ---
-    colonnes_finales = ['num_acc', 'num_veh', 'place', 'choc', 'manv', 'catv', 'secu']
-    df_vehicule = df_vehicule[colonnes_finales]
-    
+    # 3) Sélection + contraintes d’unicité
+    cols = ['num_acc', 'num_veh', 'place', 'choc', 'manv', 'catv', 'secu']
+    df_vehicule = (
+        df_work[cols]
+        .dropna(subset=['num_acc', 'num_veh'])
+        .drop_duplicates(subset=['num_acc', 'num_veh'])
+    )
+
     print(f"\n✅ DataFrame 'df_vehicule' créé avec succès ({len(df_vehicule):,} lignes).")
     return df_vehicule
 
 
 def creer_df_commune(df_source: pd.DataFrame) -> pd.DataFrame:
     """
-    Crée le DataFrame des communes à partir du DataFrame source (df_silver).
+    Crée le DataFrame des communes à partir du DataFrame source.
     Sélectionne les colonnes pertinentes et dédoublonne par code commune.
     """
     print("\n\n=====================================================")
     print("         Fonction : Création de df_commune           ")
     print("=====================================================")
-    
-    # --- ÉTAPE 1 : Sélection des Colonnes ---
 
+    # --- Renommage sécurisé ---
+    df_source = df_source.rename(columns=mapping_colonnes)
+
+    # --- Colonnes attendues ---
     col_commune = [
-        'com', 'com_name', 'com_arm_name', 'epci_code','nom_com', 'adr',
-        'lat', 'long', 'code_postal', 'coordonnees', 'code_com', 'num'
+        'com', 'com_name', 'com_arm_name', 'epci_code', 'nom_com',
+        'adr', 'lat', 'long', 'code_postal', 'coordonnees', 'code_com', 'num'
     ]
+    missing = [c for c in col_commune if c not in df_source.columns]
+    if missing:
+        raise KeyError(f"Colonnes manquantes après renommage: {missing}")
 
+    # --- Sélection ---
     df_commune = df_source[col_commune].copy()
 
-    # --- ÉTAPE 2 : Dédoublonnage et Nettoyage ---
-    # On dédoublonne sur la colonne 'com' qui semble être la clé la plus fiable ici
+    # --- Nettoyage simple ---
+    df_commune['code_com'] = df_commune['code_com'].astype(str).str.strip()
+    df_commune['com'] = df_commune['com'].astype(str).str.strip()
+
+    # --- Dédoublonnage ---
     df_commune.dropna(subset=['com'], inplace=True)
     df_commune.drop_duplicates(subset=['com'], inplace=True)
-    
-    # --- ÉTAPE 3 : Renommage ---
+
+    # --- Renommage final ---
     df_commune.rename(columns={'code_com': 'com_code'}, inplace=True)
 
     print(f"\n✅ DataFrame 'df_commune' créé avec succès ({len(df_commune):,} lignes).")
@@ -116,6 +137,7 @@ def transformation_accident(df):
 
 
 def transform_region(df):
+    df = df.rename(columns=mapping_colonnes)
     # --- Colonnes à conserver selon la table silver.region ---
     colonnes_region = ["reg_code", "reg_name", "gps"]
 
@@ -156,6 +178,7 @@ def transform_region(df):
 
 def transformation_epci(df):
     # --- Colonnes à conserver selon la table silver.region ---
+    df = df.rename(columns=mapping_colonnes)
     colonnes_epci = ["epci_code", "epci_name", "dep_code"]
 
     # --- Vérifier que les colonnes existent et les filtrer ---
@@ -195,29 +218,51 @@ def transformation_epci(df):
 
 
 
-def transformation_personne(df):
-    colonnes_personnes = [
-    'num_acc', 'num_veh', 'an_nais', 'sexe', 'actp', 'grav',
-    'locp', 'catu', 'etatp', 'occutc'
-    ]
-    df_personnes = df[colonnes_personnes].copy()
-    df_personnes = df_personnes.drop_duplicates(subset=['num_acc', 'num_veh', 'sexe'])
+def transformation_personne(df_source: pd.DataFrame) -> pd.DataFrame:
+    """
+    Construit le DF 'personne' à partir de df_source :
+    - renomme via mapping_colonnes,
+    - nettoie les champs potentiellement multi-valeurs (on garde le 1er élément),
+    - sélectionne les colonnes,
+    - dédoublonne et gère les NA utiles.
+    """
+    # 1) Renommer FR -> silver
+    df = df_source.rename(columns=mapping_colonnes)
 
-    # Supprimer lignes avec clés manquantes
-    df_personnes = df_personnes.dropna(subset=['num_acc', 'num_veh', 'sexe'])
+    # 2) Colonnes attendues
+    cols = ['num_acc', 'num_veh', 'an_nais', 'sexe', 'actp', 'grav',
+            'locp', 'catu', 'etatp', 'occutc']
+    missing = [c for c in cols if c not in df.columns]
+    if missing:
+        raise KeyError(f"Colonnes manquantes après renommage: {missing}")
 
-    df_personnes['an_nais'] = df_personnes['an_nais'].fillna('inconnu')  # évite des suppressions massives de données tout en indiquant clairement où les données sont manquantes.
-    df_personnes['locp'] = df_personnes['locp'].fillna('inconnu')
-    df_personnes['etatp'] = df_personnes['etatp'].fillna('inconnu')
-    df_personnes['occutc'] = df_personnes['occutc'].fillna('inconnu')
-    df_personnes['actp'] = df_personnes['actp'].fillna('inconnu')
+    # 3) Nettoyage "profound" (on garde le 1er élément si séparé par des virgules)
+    for c in cols:
+        df[c] = df[c].astype(str).str.split(',').str[0].str.strip()
+
+    # 4) Sélection
+    df_personnes = df[cols].copy()
+
+    # 5) Clés présentes + dédoublonnage
+    df_personnes.dropna(subset=['num_acc', 'num_veh', 'sexe'], inplace=True)
+    df_personnes.drop_duplicates(subset=['num_acc', 'num_veh', 'sexe'], inplace=True)
+
+    # 6) Remplissages utiles
+    for c in ['an_nais', 'locp', 'etatp', 'occutc', 'actp', 'grav', 'catu']:
+        df_personnes[c] = df_personnes[c].replace({'nan': None}).fillna('inconnu')
+
     return df_personnes
 
 
 def transformation_departement(df):
+    df = df.rename(columns=mapping_colonnes)
     colonnes_departement = [
         'dep_code', 'dep_name', 'reg_code', 'insee', 'dep'
     ]
+
     df_departement = df[colonnes_departement].copy()
-    df_departement = df_departement.drop_duplicates()
+
+    # Supprimer les doublons sur dep_code (clé unique)
+    df_departement = df_departement.drop_duplicates(subset=['dep_code'], keep='first')
+
     return df_departement

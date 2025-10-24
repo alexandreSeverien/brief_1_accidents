@@ -19,20 +19,13 @@ CREATE TABLE IF NOT EXISTS silver.departement (
     dep_name VARCHAR(100) NOT NULL,
     reg_code VARCHAR(3) NOT NULL,
     insee VARCHAR(10),
-    dep VARCHAR(10),
-    CONSTRAINT fk_reg_code FOREIGN KEY (reg_code) REFERENCES silver.region(reg_code)
-    ON UPDATE CASCADE ON DELETE RESTRICT
+    dep VARCHAR(10)
 );
 
 CREATE TABLE IF NOT EXISTS silver.epci (
    epci_code VARCHAR(10) PRIMARY KEY,
    epci_name VARCHAR(150) NOT NULL,
-   dep_code VARCHAR(3) NOT NULL,
-   CONSTRAINT fk_epci_departement
-       FOREIGN KEY (dep_code)
-       REFERENCES silver.departement(dep_code)
-       ON UPDATE CASCADE
-       ON DELETE RESTRICT
+   dep_code VARCHAR(3) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS silver.commune (
@@ -47,12 +40,7 @@ CREATE TABLE IF NOT EXISTS silver.commune (
    code_postal VARCHAR(10),
    coordonnees VARCHAR(100),
    com_code VARCHAR(20),
-   num VARCHAR(20),
-   CONSTRAINT fk_commune_epci
-       FOREIGN KEY (epci_code)
-       REFERENCES silver.epci(epci_code)
-       ON UPDATE CASCADE
-       ON DELETE RESTRICT
+   num VARCHAR(20)
 );
 
 CREATE TABLE IF NOT EXISTS silver.accident (
@@ -61,16 +49,11 @@ CREATE TABLE IF NOT EXISTS silver.accident (
    com VARCHAR(10) NOT NULL,
    adr VARCHAR(500),
    datetime TIMESTAMP NOT NULL,
-   year_georef VARCHAR(5),
-   CONSTRAINT fk_accident_commune
-       FOREIGN KEY (com)
-       REFERENCES silver.commune(com)
-       ON UPDATE CASCADE
-       ON DELETE RESTRICT
+   year_georef VARCHAR(5)
 );
 
 CREATE TABLE IF NOT EXISTS silver.circonstances_accident (
-num_acc VARCHAR(20) PRIMARY KEY,
+   num_acc VARCHAR(20) PRIMARY KEY,
    lum VARCHAR(15),
    agg VARCHAR(4),
    int VARCHAR(1),
@@ -97,36 +80,24 @@ num_acc VARCHAR(20) PRIMARY KEY,
    trajet VARCHAR(50),
    senc VARCHAR(50),
    obsm VARCHAR(50),
-   obs VARCHAR(50),
-   CONSTRAINT fk_circonstances_accident_accident
-       FOREIGN KEY (num_acc)
-       REFERENCES silver.accident(num_acc)
-       ON UPDATE CASCADE
-       ON DELETE RESTRICT
-
+   obs VARCHAR(50)
 );
 
 CREATE TABLE IF NOT EXISTS silver.vehicule (
    num_acc VARCHAR(20) NOT NULL,
    num_veh VARCHAR(15) NOT NULL,
    place VARCHAR(15),
-   choc VARCHAR(255),  --<-- Corrigé
-   manv VARCHAR(255),  --<-- Corrigé
-   catv VARCHAR(255),  --<-- Corrigé
-   secu VARCHAR(255),  --<-- Corrigé
-   CONSTRAINT pk_vehicule PRIMARY KEY (num_acc, num_veh),
-   CONSTRAINT fk_vehicule_accident
-       FOREIGN KEY (num_acc)
-       REFERENCES silver.accident(num_acc)
-       ON UPDATE CASCADE
-       ON DELETE RESTRICT
+   choc VARCHAR(255),
+   manv VARCHAR(255),
+   catv VARCHAR(255),
+   secu VARCHAR(255),
+   CONSTRAINT pk_vehicule PRIMARY KEY (num_acc, num_veh)
 );
-
 
 CREATE TABLE IF NOT EXISTS silver.personnes (
     num_acc VARCHAR(50),
     num_veh VARCHAR(50),
-    an_nais INT,
+    an_nais VARCHAR(50),
     sexe VARCHAR(20),
     actp VARCHAR(100),
     locp VARCHAR(50),
@@ -134,10 +105,5 @@ CREATE TABLE IF NOT EXISTS silver.personnes (
     catu VARCHAR(50),
     etatp VARCHAR(50),
     grav VARCHAR(100),
-    PRIMARY KEY (num_acc, num_veh, sexe), -- Clé primaire améliorée pour plus d'unicité
-    CONSTRAINT fk_personne_vehicule
-       FOREIGN KEY (num_acc, num_veh)
-       REFERENCES silver.vehicule(num_acc, num_veh)
-       ON UPDATE CASCADE
-       ON DELETE RESTRICT
+    PRIMARY KEY (num_acc, num_veh, sexe)
 );

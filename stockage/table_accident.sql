@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS silver.personnes (
     catu VARCHAR(50),
     etatp VARCHAR(50),
     grav VARCHAR(100),
-    PRIMARY KEY (num_acc, num_veh),
+    PRIMARY KEY (num_acc, num_veh, sexe),
     CONSTRAINT fk_personne_vehicule
        FOREIGN KEY (num_acc, num_veh)
        REFERENCES silver.vehicule(num_acc, num_veh)

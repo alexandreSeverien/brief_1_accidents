@@ -1,6 +1,7 @@
-EDA/accidents-corporels-de-la-circulation-en-france.csv.download/
+DA/accidents-corporels-de-la-circulation-en-france.csv.download/
 accidents-corporels-de-la-circulation-millesime.csv
 .venv/
 .env
 venv
+*.pyc
 __pycache__/
